@@ -8,14 +8,32 @@ import {CustomizedPicker} from '../components/CustomizedPicker'
 import { OptionsPicker } from '../components/OptionsPicker';
 import { ReturnButton } from '../components/ReturnButton';
 import router from '@ohos.router';
+import { SettingsModel } from '../model/SettingsModel';
+import SettingsHandler from '../common/utils/SettingsHandler';
 
 
 @Entry
 @Component
 struct Settings {
         @State message: string = '';
-
         @State emptyValue: string = ""
+        private settings = new SettingsHandler();
+        private settingsModel: SettingsModel = {
+                background: "app.media.background1",
+                remindTime: 0,
+                format: 0
+        };
+
+
+        aboutToAppear(): void {
+                this.handlePreferencesExtract()
+        }
+
+        private async handlePreferencesExtract(){
+
+                this.settingsModel =  await this.settings.getPreference()
+        }
+
         private handleBackgroundJump(): void{
                 router.pushUrl({
                         url: "pages/Background"
@@ -64,7 +82,7 @@ struct Settings {
 
 
 
-                }.width('100%').height('100%').backgroundImage($r("app.media.background1")).backgroundImageSize(ImageSize.Cover)
+                }.width('100%').height('100%').backgroundImage($r(this.settingsModel.background)).backgroundImageSize(ImageSize.Cover)
 
 
         }

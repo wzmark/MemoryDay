@@ -4,27 +4,18 @@ import {AddEventButton} from '../components/AddEventButton'
 import { CustomizedDatePicker } from '../components/CustomizedDatePicker';
 import { InputBox } from '../components/InputBox';
 import { SettingsButton } from '../components/SettingsButton';
-import {CustomizedPicker} from '../components/CustomizedPicker'
-import { OptionsPicker } from '../components/OptionsPicker';
-import { CheckButton } from '../components/CheckButton';
-import { ReturnButton } from '../components/ReturnButton';
-import { preferences } from '@kit.ArkData';
+
 import { common, contextConstant } from '@kit.AbilityKit';
 import { distributedKVStore } from '@kit.ArkData';
-import { util } from '@kit.ArkTS';
-import { BusinessError } from '@kit.BasicServicesKit';
+
 import KVStore from '../common/utils/KVStore';
 import { KVStoreType } from '../viewmodel/KVStoreType';
 import { EventList, EventItem } from '../model/EventModel';
 import { EventDisplayList } from '../components/EventDisplayList';
 import { DayArrowSymbol } from '../components/DayArrowSymbol';
 import { TopEventDisplay } from '../components/TopEventDisplay';
-import data from '../../resources/base/element/string.json'
-import { fileIo as fs } from '@kit.CoreFileKit';
-import { buffer } from '@kit.ArkTS';
-
-
-
+import Settings from '../common/utils/SettingsHandler';
+import { SettingsModel } from '../model/SettingsModel';
 
 
 @Entry
@@ -39,7 +30,12 @@ struct Index {
         @StorageLink('kvStoreAll') kvStoreAll: KVStoreType[] = [];
 
         private context = getContext(this) as common.UIAbilityContext;
-
+        private settings = new Settings();
+        private settingsModel: SettingsModel = {
+                background: "app.media.background1",
+                remindTime: 0,
+                format: 0
+        };
 
         @State eventList: EventItem[] = [];
         @State topEvent: KVStoreType = new KVStoreType("", "", "");
@@ -52,48 +48,20 @@ struct Index {
                 testNapi.initRDB(databaseDir);
                 this.handleDataExtract()
                 this.handlePreferencesExtract()
+                this.handlePreferencesExtract()
+
 
 
         }
 
         private async handlePreferencesExtract(){
-                //切换低加密加密级别
-                this.context.area = contextConstant.AreaMode.EL1
-                let preferenceDir = this.context.getApplicationContext().preferencesDir;
-                console.info("Test   " +preferenceDir)
-                let pathDir = preferenceDir + "preference.json"
-                let arrayBuffer = new ArrayBuffer(4096);
-                fs.open(pathDir, fs.OpenMode.READ_WRITE | fs.OpenMode.CREATE).then((file: fs.File) => {
-                        console.info("file fd: " + file.fd);
-                        fs.read(file.fd, arrayBuffer).then((readLen: number) => {
-                                console.info("read file data succeed");
-                                let buf = buffer.from(arrayBuffer, 0, readLen);
-                                if(buf.length === 0){
-                                        console.info("empty file")
-                                }
-                                console.info(`The content of file: ${buf.toString()}`);
-                        }).catch((err: BusinessError) => {
-                                console.error("read file data failed with error message: " + err.message + ", error code: " + err.code);
-                        }).finally(() => {
-                                fs.closeSync(file);
-                        });
-                }).catch((err: BusinessError) => {
-                        console.error("open file failed with error message: " + err.message + ", error code: " + err.code);
-                });
 
+                this.settingsModel =  await this.settings.getPreference()
         }
 
 
 
         private async handleDataExtract(){
-
-
-
-
-
-
-
-
 
 
                 let resultObjects = testNapi.searchRDB() as object[];
@@ -145,7 +113,7 @@ struct Index {
 
 
 
-                        }.width('100%').justifyContent(FlexAlign.SpaceBetween).height("100%").backgroundImage($r("app.media.background1")).backgroundImageSize(ImageSize.Cover)
+                        }.width('100%').justifyContent(FlexAlign.SpaceBetween).height("100%").backgroundImage($r(this.settingsModel.background)).backgroundImageSize(ImageSize.Cover)
 
 
         }

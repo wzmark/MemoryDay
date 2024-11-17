@@ -18,6 +18,8 @@ import { BusinessError } from '@kit.BasicServicesKit';
 import KVStore from '../common/utils/KVStore';
 import { KVStoreType } from '../viewmodel/KVStoreType';
 import { OptionsPickerSymbol } from '../components/OptionsPickerSymbol';
+import { SettingsModel } from '../model/SettingsModel';
+import Settings from '../common/utils/SettingsHandler';
 
 
 @Entry
@@ -42,12 +44,22 @@ struct Add {
         @StorageLink('encrypted') encrypted: boolean = false;
         @StorageLink('kvStore') kvStore: KVStore | undefined = new KVStore(this.encrypted, this.securityLevel);
         @StorageLink('kvStoreAll') kvStoreAll: KVStoreType[] = [];
-
+        private settings = new Settings();
+        private settingsModel: SettingsModel = {
+                background: "app.media.background1",
+                remindTime: 0,
+                format: 0
+        };
 
         aboutToAppear(): void {
                 let databaseDir = this.context.getApplicationContext().databaseDir;
 
                 testNapi.initRDB(databaseDir);
+                this.handlePreferencesExtract()
+        }
+        private async handlePreferencesExtract(){
+
+                this.settingsModel =  await this.settings.getPreference()
         }
 
         private handleDateButtonClick(): void {
@@ -192,6 +204,6 @@ struct Add {
                         }.width('100%').justifyContent(FlexAlign.SpaceBetween).height("95%")
 
                 }
-                .height('100%').backgroundImage($r("app.media.background1")).backgroundImageSize(ImageSize.Cover)
+                .height('100%').backgroundImage($r(this.settingsModel.background)).backgroundImageSize(ImageSize.Cover)
         }
 }
