@@ -5,7 +5,14 @@ import { common, contextConstant } from '@kit.AbilityKit';
 import json from '@ohos.util.json';
 import { BusinessError } from '@kit.BasicServicesKit';
 import {SettingsModel} from '../../model/SettingsModel'
+import { photoAccessHelper } from '@kit.MediaLibraryKit';
+import { image } from '@kit.ImageKit';
+import { resourceManager } from '@kit.LocalizationKit';
 
+
+interface GeneratedObjectLiteralInterface_1 {
+        "rotate": number;
+}
 
 export default class SettingsHandler{
         private context = getContext(this) as common.UIAbilityContext;
@@ -13,13 +20,15 @@ export default class SettingsHandler{
         private filePath: string;
         private arrayBuffer: ArrayBuffer
         private template: SettingsModel;
+        private customizedImagePath: string
 
 
         constructor(){
                 this.context.area = contextConstant.AreaMode.EL1
                 this.preferenceDir = this.context.getApplicationContext().preferencesDir;
                 this.filePath = this.preferenceDir + "/preference.json"
-                this.arrayBuffer = new ArrayBuffer(4096);
+                this.customizedImagePath = this.preferenceDir + "/customizedImage.jpg"
+                this.arrayBuffer = new ArrayBuffer(10240);
 
                 this.template = {
                         background: "app.media.background1",
@@ -42,7 +51,9 @@ export default class SettingsHandler{
 
 
         async getPreference(): Promise<SettingsModel> {
+
                 return new Promise((resolve, reject) => {
+
                         fs.open(this.filePath, fs.OpenMode.READ_WRITE | fs.OpenMode.CREATE)
                                 .then((file: fs.File) => {
                                         console.info("file fd: " + file.fd);
@@ -106,8 +117,8 @@ export default class SettingsHandler{
                                                 let writeOption: WriteOptions = {
                                                         offset: 0
                                                 }
-
-
+                                                console.info("Change settings:  "  + JSON.stringify(jsonSettings))
+                                                fs.truncate(file.fd, 0)
                                                 fs.write(file.fd, JSON.stringify(jsonSettings), writeOption).then((writeLen: number) => {
                                                         console.info("write data to file succeed and size is:" + writeLen + "    Data is:" + JSON.stringify(jsonSettings));
                                                 }).catch((err: BusinessError) => {
@@ -154,6 +165,108 @@ export default class SettingsHandler{
 
 
                 return result;
+        }
+
+
+        async handlePhotoSelect(){
+                try {
+                        let PhotoSelectOptions = new photoAccessHelper.PhotoSelectOptions();
+                        PhotoSelectOptions.MIMEType = photoAccessHelper.PhotoViewMIMETypes.IMAGE_TYPE;
+                        PhotoSelectOptions.maxSelectNumber = 1;
+                        let photoPicker = new photoAccessHelper.PhotoViewPicker();
+                        photoPicker.select(PhotoSelectOptions).then((PhotoSelectResult: photoAccessHelper.PhotoSelectResult) => {
+                                console.info('PhotoViewPicker.select successfully, PhotoSelectResult uri: ' + JSON.stringify(PhotoSelectResult));
+                                let tempImagePath = PhotoSelectResult.photoUris[0]
+                                fs.open(tempImagePath, fs.OpenMode.READ_ONLY).then((file: fs.File) => {
+                                        fs.copyFile(file.fd, this.customizedImagePath, 0, (err: BusinessError) => {
+                                                if (err) {
+                                                        console.error("copy file failed with error message: " + err.message + ", error code: " + err.code);
+                                                } else {
+                                                        console.info("copy file succeed");
+                                                }
+                                        })
+                                }).catch((err: BusinessError) => {
+                                        console.error("read file data failed with error message: " + err.message + ", error code: " + err.code);
+                                })
+                        }).catch((err: BusinessError) => {
+                                console.error(`PhotoViewPicker.select failed with err: ${err.code}, ${err.message}`);
+                        });
+                } catch (error) {
+                        let err: BusinessError = error as BusinessError;
+                        console.error(`PhotoViewPicker failed with err: ${err.code}, ${err.message}`);
+                }
+        }
+
+        async getCustomizedPhoto(): Promise<image.PixelMap>{
+
+                let settings: SettingsModel = await this.getPreference()
+
+                const background = settings.background
+
+                return new Promise((resolve, reject) => {
+                        if(background === "customizedImage"){
+
+                                fs.open(this.customizedImagePath, fs.OpenMode.READ_WRITE | fs.OpenMode.CREATE)
+                                        .then((file: fs.File) => {
+                                                console.info("file fd: " + file.fd);
+                                                let imageSource = image.createImageSource(file.fd)
+                                                imageSource.createPixelMap((err, pixelmap) => {
+                                                        resolve(pixelmap)
+                                                })
+                                        })
+                                        .catch((err: BusinessError) => {
+                                                console.error("open file failed with error message: " + err.message + ", error code: " + err.code);
+                                                reject(err);
+                                        });
+                        }else{
+                                let fileId = -1
+                                console.info("Log123  " + background + "   id   " + $r(background).id + "    normal id  " + $r("app.media.background2").id)
+                                switch (background){
+                                        case "app.media.background1":
+                                                fileId = $r("app.media.background1").id
+                                                break
+                                        case "app.media.background2":
+                                                fileId = $r("app.media.background2").id
+                                                break
+                                        case "app.media.background3":
+                                                fileId = $r("app.media.background3").id
+                                                break
+                                        case "app.media.background4":
+                                                fileId = $r("app.media.background4").id
+                                                break
+                                }
+                                this.context.resourceManager.getMediaContent(fileId).then((data) => {
+
+                                        this.arrayBuffer = data.buffer.slice(data.byteOffset, data.byteLength + data.byteOffset)
+                                        let imageSource: image.ImageSource = image.createImageSource(this.arrayBuffer);
+                                        imageSource.getImageInfo((err, value) => {
+                                                //获取图片资源的尺寸
+                                                console.log(`图片的尺寸为：width:${value.size.width}height:${value.size.height}`)
+                                                if (err) {return;}
+                                                //转PixelMap
+                                                let opts: image.DecodingOptions =
+                                                        { editable: true, desiredSize: { height: value.size.height, width: value.size.width } };
+                                                imageSource.createPixelMap(opts, (err,
+                                                        pixelMap) => {
+                                                        let imagePixelMap = pixelMap
+                                                        resolve(imagePixelMap)
+                                                })
+                                        })
+                                }).catch((err: BusinessError) => {
+                                        console.error("open Image with error: " + err.message + ", error code: " + err.code);
+                                        reject(err);
+                                })
+                        }
+
+
+
+
+
+
+
+
+
+                });
         }
 
 

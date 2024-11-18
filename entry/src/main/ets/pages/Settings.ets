@@ -9,7 +9,8 @@ import { OptionsPicker } from '../components/OptionsPicker';
 import { ReturnButton } from '../components/ReturnButton';
 import router from '@ohos.router';
 import { SettingsModel } from '../model/SettingsModel';
-import optionsRemind from '../common/utils/SettingsHandler';
+import SettingsHandler from '../common/utils/SettingsHandler';
+import resourceManager from '@ohos.resourceManager'
 
 
 @Entry
@@ -17,7 +18,7 @@ import optionsRemind from '../common/utils/SettingsHandler';
 struct Settings {
         @State message: string = '';
         @State emptyValue: string = ""
-        @State settings: optionsRemind = new optionsRemind();
+        @State settings: SettingsHandler = new SettingsHandler();
         @State settingsModel: SettingsModel = {
                 background: "app.media.background1",
                 remindTime: 0,
@@ -36,7 +37,7 @@ struct Settings {
         ]
         @State valueFormat: string = ""
         @State isFormatOpen: boolean = false
-
+        @State customizedBackground: PixelMap | ResourceStr | undefined = undefined
 
         aboutToAppear(): void {
                 this.handlePreferencesExtract()
@@ -60,6 +61,8 @@ struct Settings {
         private async handlePreferencesExtract(){
 
                 this.settingsModel =  await this.settings.getPreference()
+
+                this.customizedBackground = await this.settings.getCustomizedPhoto()
                 this.valueRemind = this.optionsRemind[this.settingsModel.remindTime]
                 this.valueFormat = this.optionsFormat[this.settingsModel.format]
         }
@@ -158,7 +161,7 @@ struct Settings {
 
 
 
-                }.width('100%').height('100%').backgroundImage($r(this.settingsModel.background)).backgroundImageSize(ImageSize.Cover)
+                }.width('100%').height('100%').backgroundImage(this.customizedBackground).backgroundImageSize(ImageSize.Cover)
 
 
         }

@@ -27,7 +27,7 @@ struct Background {
                 format: 0
         };
         @State tempBackground: string = "";
-
+        @State customizedBackground: PixelMap | undefined = undefined
 
         private handleButtonClick(): void{
 
@@ -40,6 +40,14 @@ struct Background {
 
         private async handlePreferencesExtract(): Promise<void> {
                 this.settingsModel = await this.settings.getPreference();
+                this.customizedBackground = await this.settings.getCustomizedPhoto()
+        }
+
+        private async updateBackground(){
+
+                this.customizedBackground = await this.settings.getCustomizedPhoto()
+                this.customizedBackground = await this.settings.getCustomizedPhoto()
+                console.log("update background")
         }
         build() {
                 Column() {
@@ -64,11 +72,12 @@ struct Background {
                                                                 this.settings.changeSettings("background", "app.media." + path)
 
                                                                 this.tempBackground = "app.media." + path
+                                                                this.updateBackground()
                                                         })
                                         }
                                 })
                                 GridItem(){
-                                        AddImageButton()
+                                        AddImageButton({onButtonClick: {click: this.updateBackground.bind(this)}})
                                 }
                         }.columnsTemplate('1fr 1fr 1fr')
                         .height(300).rowsGap(10)
@@ -77,7 +86,7 @@ struct Background {
 
 
 
-                }.width('100%').height('100%').backgroundImage($r(this.tempBackground)).backgroundImageSize(ImageSize.Cover)
+                }.width('100%').height('100%').backgroundImage(this.customizedBackground).backgroundImageSize(ImageSize.Cover)
 
 
         }

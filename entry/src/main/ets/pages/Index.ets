@@ -41,13 +41,16 @@ struct Index {
         @State topEvent: KVStoreType = new KVStoreType("", "", "");
         @State tempBackground: string = "app.media.background2"
         @State needsRender: boolean = false
+        @State customizedBackground: PixelMap | ResourceStr | undefined = undefined
 
         aboutToAppear(): void {
+
                 this.context.area = contextConstant.AreaMode.EL2
                 let databaseDir = this.context.getApplicationContext().databaseDir;
 
                 testNapi.initRDB(databaseDir);
                 this.handleDataExtract()
+
                 this.handlePreferencesExtract()
 
 
@@ -58,6 +61,8 @@ struct Index {
         private async handlePreferencesExtract(){
 
                 this.settingsModel =  await this.settings.getPreference()
+
+                this.customizedBackground = await this.settings.getCustomizedPhoto()
                 this.tempBackground = this.settingsModel.background
                 this.needsRender = true
         }
@@ -121,7 +126,7 @@ struct Index {
 
 
 
-                        }.width('100%').justifyContent(FlexAlign.SpaceBetween).height("100%").backgroundImage($r(this.tempBackground)).backgroundImageSize(ImageSize.Cover)
+                        }.width('100%').justifyContent(FlexAlign.SpaceBetween).height("100%").backgroundImage(this.customizedBackground).backgroundImageSize(ImageSize.Cover)
                 }
 
 

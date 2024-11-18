@@ -50,6 +50,7 @@ struct Add {
                 remindTime: 0,
                 format: 0
         };
+        @State customizedBackground: PixelMap | undefined = undefined
 
         aboutToAppear(): void {
                 let databaseDir = this.context.getApplicationContext().databaseDir;
@@ -60,6 +61,7 @@ struct Add {
         private async handlePreferencesExtract(){
 
                 this.settingsModel =  await this.settings.getPreference()
+                this.customizedBackground = await this.settings.getCustomizedPhoto()
         }
 
         private handleDateButtonClick(): void {
@@ -207,6 +209,6 @@ struct Add {
                         }.width('100%').justifyContent(FlexAlign.SpaceBetween).height("100%")
 
                 }
-                .height('100%').backgroundImage($r(this.settingsModel.background)).backgroundImageSize(ImageSize.Cover)
+                .height('100%').backgroundImage(this.customizedBackground).backgroundImageSize(ImageSize.Cover)
         }
 }
