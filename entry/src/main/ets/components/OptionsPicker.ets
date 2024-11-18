@@ -28,7 +28,8 @@ export struct OptionsPicker{
                                         this.onButtonClick.click(value as string)
                                         console.log(value as string)
                                 }).divider({strokeWidth: "2px"})
-                                .disappearTextStyle({color: "#ffffff"}).selectedTextStyle({color: "#ffffff"})
+                                .disappearTextStyle({color: "#ffffff"})
+                                .selectedTextStyle({color: "#ffffff"}).canLoop(false)
 
                 }.width("100%").backgroundColor('#676666').justifyContent(FlexAlign.Center)
 

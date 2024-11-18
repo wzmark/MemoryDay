@@ -14,7 +14,7 @@ import { EventList, EventItem } from '../model/EventModel';
 import { EventDisplayList } from '../components/EventDisplayList';
 import { DayArrowSymbol } from '../components/DayArrowSymbol';
 import { TopEventDisplay } from '../components/TopEventDisplay';
-import Settings from '../common/utils/SettingsHandler';
+import SettingsHandler from '../common/utils/SettingsHandler';
 import { SettingsModel } from '../model/SettingsModel';
 
 
@@ -30,16 +30,17 @@ struct Index {
         @StorageLink('kvStoreAll') kvStoreAll: KVStoreType[] = [];
 
         private context = getContext(this) as common.UIAbilityContext;
-        private settings = new Settings();
-        private settingsModel: SettingsModel = {
-                background: "app.media.background1",
+        private settings = new SettingsHandler();
+        @State settingsModel: SettingsModel = {
+                background: "app.media.background4",
                 remindTime: 0,
                 format: 0
         };
 
         @State eventList: EventItem[] = [];
         @State topEvent: KVStoreType = new KVStoreType("", "", "");
-
+        @State tempBackground: string = "app.media.background2"
+        @State needsRender: boolean = false
 
         aboutToAppear(): void {
                 this.context.area = contextConstant.AreaMode.EL2
@@ -48,7 +49,7 @@ struct Index {
                 testNapi.initRDB(databaseDir);
                 this.handleDataExtract()
                 this.handlePreferencesExtract()
-                this.handlePreferencesExtract()
+
 
 
 
@@ -57,6 +58,8 @@ struct Index {
         private async handlePreferencesExtract(){
 
                 this.settingsModel =  await this.settings.getPreference()
+                this.tempBackground = this.settingsModel.background
+                this.needsRender = true
         }
 
 
@@ -88,7 +91,7 @@ struct Index {
 
 
         build() {
-
+                if(this.needsRender){
                         Column() {
                                 Column(){
                                         Row() {
@@ -100,9 +103,14 @@ struct Index {
                                                         .fontColor("#ffffff").width("40%")
                                                 AddEventButton()
 
-                                        }.justifyContent(FlexAlign.SpaceBetween).width("95%")
-
-                                        TopEventDisplay({event: this.eventList[0]})
+                                        }.justifyContent(FlexAlign.SpaceBetween).width("95%").margin({
+                                                top: '30px',    // 设置上外边距
+                                                bottom: '30px', // 设置下外边距
+                                        })
+                                        if(this.eventList.length > 0){
+                                                TopEventDisplay({event: this.eventList[0]})
+                                        }
+                                        //
                                 }
 
 
@@ -113,7 +121,9 @@ struct Index {
 
 
 
-                        }.width('100%').justifyContent(FlexAlign.SpaceBetween).height("100%").backgroundImage($r(this.settingsModel.background)).backgroundImageSize(ImageSize.Cover)
+                        }.width('100%').justifyContent(FlexAlign.SpaceBetween).height("100%").backgroundImage($r(this.tempBackground)).backgroundImageSize(ImageSize.Cover)
+                }
+
 
 
         }

@@ -19,7 +19,7 @@ import KVStore from '../common/utils/KVStore';
 import { KVStoreType } from '../viewmodel/KVStoreType';
 import { OptionsPickerSymbol } from '../components/OptionsPickerSymbol';
 import { SettingsModel } from '../model/SettingsModel';
-import Settings from '../common/utils/SettingsHandler';
+import SettingsHandler from '../common/utils/SettingsHandler';
 
 
 @Entry
@@ -44,8 +44,8 @@ struct Add {
         @StorageLink('encrypted') encrypted: boolean = false;
         @StorageLink('kvStore') kvStore: KVStore | undefined = new KVStore(this.encrypted, this.securityLevel);
         @StorageLink('kvStoreAll') kvStoreAll: KVStoreType[] = [];
-        private settings = new Settings();
-        private settingsModel: SettingsModel = {
+        private settings = new SettingsHandler();
+        @State settingsModel: SettingsModel = {
                 background: "app.media.background1",
                 remindTime: 0,
                 format: 0
@@ -128,7 +128,10 @@ struct Add {
 
                                                 CheckButton({onButtonClick: {click: this.handleDataSave.bind(this)}})
 
-                                        }.justifyContent(FlexAlign.SpaceBetween).width("95%")
+                                        }.justifyContent(FlexAlign.SpaceBetween).width("95%").margin({
+                                                top: '30px',    // 设置上外边距
+                                                bottom: '30px', // 设置下外边距
+                                        })
                                         InputBox({
                                                 title: "事件名",
                                                 placeHolder: "testPlaceHolder",
@@ -201,7 +204,7 @@ struct Add {
 
 
 
-                        }.width('100%').justifyContent(FlexAlign.SpaceBetween).height("95%")
+                        }.width('100%').justifyContent(FlexAlign.SpaceBetween).height("100%")
 
                 }
                 .height('100%').backgroundImage($r(this.settingsModel.background)).backgroundImageSize(ImageSize.Cover)

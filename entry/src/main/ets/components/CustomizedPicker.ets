@@ -57,9 +57,18 @@ export struct CustomizedPicker{
                                         OptionsPickerSymbol()
                                 }
 
-
-
-
+                        }else if(this.type === "format"){
+                                Text((this.value as string))
+                                        .fontSize(20)
+                                        .fontWeight(FontWeight.Bold)
+                                        .fontColor("#ffffff")
+                                OptionsPickerSymbol()
+                        } else if(this.type === "remind"){
+                                Text(((this.value as string)))
+                                        .fontSize(20)
+                                        .fontWeight(FontWeight.Bold)
+                                        .fontColor("#ffffff")
+                                OptionsPickerSymbol()
                         }else{
                                 OptionsPickerSymbol()
                         }
