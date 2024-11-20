@@ -168,33 +168,40 @@ export default class SettingsHandler{
         }
 
 
-        async handlePhotoSelect(){
-                try {
-                        let PhotoSelectOptions = new photoAccessHelper.PhotoSelectOptions();
-                        PhotoSelectOptions.MIMEType = photoAccessHelper.PhotoViewMIMETypes.IMAGE_TYPE;
-                        PhotoSelectOptions.maxSelectNumber = 1;
-                        let photoPicker = new photoAccessHelper.PhotoViewPicker();
-                        photoPicker.select(PhotoSelectOptions).then((PhotoSelectResult: photoAccessHelper.PhotoSelectResult) => {
-                                console.info('PhotoViewPicker.select successfully, PhotoSelectResult uri: ' + JSON.stringify(PhotoSelectResult));
-                                let tempImagePath = PhotoSelectResult.photoUris[0]
-                                fs.open(tempImagePath, fs.OpenMode.READ_ONLY).then((file: fs.File) => {
-                                        fs.copyFile(file.fd, this.customizedImagePath, 0, (err: BusinessError) => {
-                                                if (err) {
-                                                        console.error("copy file failed with error message: " + err.message + ", error code: " + err.code);
-                                                } else {
-                                                        console.info("copy file succeed");
-                                                }
+        async handlePhotoSelect(): Promise<image.PixelMap>{
+                return new Promise((resolve, reject) => {
+                        try {
+                                let PhotoSelectOptions = new photoAccessHelper.PhotoSelectOptions();
+                                PhotoSelectOptions.MIMEType = photoAccessHelper.PhotoViewMIMETypes.IMAGE_TYPE;
+                                PhotoSelectOptions.maxSelectNumber = 1;
+                                let photoPicker = new photoAccessHelper.PhotoViewPicker();
+                                photoPicker.select(PhotoSelectOptions).then((PhotoSelectResult: photoAccessHelper.PhotoSelectResult) => {
+                                        console.info('PhotoViewPicker.select successfully, PhotoSelectResult uri: ' + JSON.stringify(PhotoSelectResult));
+                                        let tempImagePath = PhotoSelectResult.photoUris[0]
+                                        fs.open(tempImagePath, fs.OpenMode.READ_ONLY).then((file: fs.File) => {
+                                                fs.copyFile(file.fd, this.customizedImagePath, 0, (err: BusinessError) => {
+                                                        if (err) {
+                                                                console.error("copy file failed with error message: " + err.message + ", error code: " + err.code);
+                                                        } else {
+                                                                let imageSource = image.createImageSource(file.fd)
+                                                                imageSource.createPixelMap((err, pixelmap) => {
+                                                                        resolve(pixelmap)
+                                                                })
+                                                                console.info("copy file succeed");
+                                                        }
+                                                })
+                                        }).catch((err: BusinessError) => {
+                                                console.error("read file data failed with error message: " + err.message + ", error code: " + err.code);
                                         })
                                 }).catch((err: BusinessError) => {
-                                        console.error("read file data failed with error message: " + err.message + ", error code: " + err.code);
-                                })
-                        }).catch((err: BusinessError) => {
-                                console.error(`PhotoViewPicker.select failed with err: ${err.code}, ${err.message}`);
-                        });
-                } catch (error) {
-                        let err: BusinessError = error as BusinessError;
-                        console.error(`PhotoViewPicker failed with err: ${err.code}, ${err.message}`);
-                }
+                                        console.error(`PhotoViewPicker.select failed with err: ${err.code}, ${err.message}`);
+                                });
+                        } catch (error) {
+                                let err: BusinessError = error as BusinessError;
+                                console.error(`PhotoViewPicker failed with err: ${err.code}, ${err.message}`);
+                        }
+                })
+
         }
 
         async getCustomizedPhoto(): Promise<image.PixelMap>{

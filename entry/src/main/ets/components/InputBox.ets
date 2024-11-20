@@ -16,6 +16,10 @@ export struct InputBox{
         @Link value : string | boolean;
         @State date: Date = new Date(Date.now());
 
+        aboutToAppear(): void {
+                console.error("This value   " + this.value)
+        }
+
 
 
         build() {
@@ -34,10 +38,18 @@ export struct InputBox{
                                                 this.onValueChange.change(value)
                                         })
                         }else if(this.type === "switch"){
-                                Toggle({type: ToggleType.Checkbox, isOn: (this.value as boolean)})
-                                        .onChange((isOn: boolean) => {
-                                                this.onValueChange.change(isOn)
-                                        })
+                                if((this.value as boolean)){
+                                        Toggle({type: ToggleType.Checkbox, isOn: true})
+                                                .onChange((isOn: boolean) => {
+                                                        this.onValueChange.change(isOn)
+                                                })
+                                }else{
+                                        Toggle({type: ToggleType.Checkbox, isOn: false})
+                                                .onChange((isOn: boolean) => {
+                                                        this.onValueChange.change(isOn)
+                                                })
+                                }
+
                         }
 
                 }.justifyContent(FlexAlign.SpaceBetween).width("90%").border({

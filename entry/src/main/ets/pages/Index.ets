@@ -36,10 +36,11 @@ struct Index {
                 remindTime: 0,
                 format: 0
         };
+        @State tempBackground: string = "app.media.background2"
 
         @State eventList: EventItem[] = [];
         @State topEvent: KVStoreType = new KVStoreType("", "", "");
-        @State tempBackground: string = "app.media.background2"
+
         @State needsRender: boolean = false
         @State customizedBackground: PixelMap | ResourceStr | undefined = undefined
 

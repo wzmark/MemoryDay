@@ -49,6 +49,12 @@ struct Background {
                 this.customizedBackground = await this.settings.getCustomizedPhoto()
                 console.log("update background")
         }
+
+
+        private async updateCustomizedBackground(){{
+                this.customizedBackground = await this.settings.handlePhotoSelect()
+                this.settings.changeSettings("background", "customizedImage")
+        }}
         build() {
                 Column() {
                         Row() {
@@ -77,7 +83,7 @@ struct Background {
                                         }
                                 })
                                 GridItem(){
-                                        AddImageButton({onButtonClick: {click: this.updateBackground.bind(this)}})
+                                        AddImageButton({onButtonClick: {click: this.updateCustomizedBackground.bind(this)}})
                                 }
                         }.columnsTemplate('1fr 1fr 1fr')
                         .height(300).rowsGap(10)

@@ -20,11 +20,15 @@ import { KVStoreType } from '../viewmodel/KVStoreType';
 import { OptionsPickerSymbol } from '../components/OptionsPickerSymbol';
 import { SettingsModel } from '../model/SettingsModel';
 import SettingsHandler from '../common/utils/SettingsHandler';
+import { router } from '@kit.ArkUI';
+import { EventItem } from '../model/EventModel';
 
 
 @Entry
 @Component
 struct Add {
+
+
         @State message: string = '';
         @State isDatePickerOpen: boolean = false;
         @State isTagOptionOpen: boolean = false;
@@ -53,6 +57,8 @@ struct Add {
         @State customizedBackground: PixelMap | undefined = undefined
 
         aboutToAppear(): void {
+
+
                 let databaseDir = this.context.getApplicationContext().databaseDir;
 
                 testNapi.initRDB(databaseDir);

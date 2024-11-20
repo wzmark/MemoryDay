@@ -32,9 +32,15 @@ export struct AddImageButton{
                                 })
 
                 }.onClick(() => {
+                        this.onButtonClick.click()
+                        /*
                         this.settings.handlePhotoSelect()
                         this.settings.changeSettings("background", "customizedImage")
-                        this.onButtonClick.click()
+                        setTimeout(async () => {
+                                this.onButtonClick.click()
+                        }, 1000);
+                        * */
+
                 }).backgroundColor('#00000000')
         }
 }

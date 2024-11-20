@@ -17,12 +17,19 @@ import { util } from '@kit.ArkTS';
 import { BusinessError } from '@kit.BasicServicesKit';
 import KVStore from '../common/utils/KVStore';
 import { KVStoreType } from '../viewmodel/KVStoreType';
-
+import { OptionsPickerSymbol } from '../components/OptionsPickerSymbol';
+import { SettingsModel } from '../model/SettingsModel';
+import SettingsHandler from '../common/utils/SettingsHandler';
+import { router } from '@kit.ArkUI';
+import { EventItem } from '../model/EventModel';
 
 
 @Entry
 @Component
 struct Add {
+        @State params: Record<string, object>  = (router.getParams() as Record<string, object>)
+        @State event: EventItem  = this.params["event"] as EventItem
+
         @State message: string = '';
         @State isDatePickerOpen: boolean = false;
         @State isTagOptionOpen: boolean = false;
@@ -35,19 +42,40 @@ struct Add {
         @State dateValue: Date = new Date(Date.now());
         @State repeatValue: string = this.repeatOptions[0];
         @State tagValue: string = this.tagOptions[0];
-        @State topValue: boolean = false;
+        @State topValue: boolean = true
 
         private context = getContext(this) as common.UIAbilityContext;
         @State securityLevel: distributedKVStore.SecurityLevel = distributedKVStore.SecurityLevel.S1;
         @StorageLink('encrypted') encrypted: boolean = false;
         @StorageLink('kvStore') kvStore: KVStore | undefined = new KVStore(this.encrypted, this.securityLevel);
         @StorageLink('kvStoreAll') kvStoreAll: KVStoreType[] = [];
-
+        private settings = new SettingsHandler();
+        @State settingsModel: SettingsModel = {
+                background: "app.media.background1",
+                remindTime: 0,
+                format: 0
+        };
+        @State customizedBackground: PixelMap | undefined = undefined
 
         aboutToAppear(): void {
+
+                this.titleValue = this.event.title
+                this.dateValue = new Date(this.event.date)
+                this.tagValue = this.event.tag
+                this.repeatValue = this.event.repeat
+                console.error(" EVent Content:  " + this.event.top)
+                this.topValue = this.event.top
+
+
                 let databaseDir = this.context.getApplicationContext().databaseDir;
 
                 testNapi.initRDB(databaseDir);
+                this.handlePreferencesExtract()
+        }
+        private async handlePreferencesExtract(){
+
+                this.settingsModel =  await this.settings.getPreference()
+                this.customizedBackground = await this.settings.getCustomizedPhoto()
         }
 
         private handleDateButtonClick(): void {
@@ -86,15 +114,18 @@ struct Add {
         }
 
         private async handleDataSave(){
-                testNapi.addRDB(this.titleValue, this.dateValue.toDateString(), this.repeatValue, this.tagValue, this.topValue)
+                let topValueString: string = this.topValue ? "true" : "false";
+
+                testNapi.addRDB(this.titleValue, this.dateValue.toDateString(), this.repeatValue, this.tagValue, topValueString)
 
                 let resultObjects = testNapi.searchRDB() as object[];
 
 
                 for (let i: number = 0; i < resultObjects.length; i++) {
 
-                        console.error(resultObjects[i]['title'] + "   " + resultObjects[i]['date'])
+                        console.error(resultObjects[i]['title'] + " |  " + resultObjects[i]['date'] +"  |  " + resultObjects[i]['tag'] + "  |  " + resultObjects[i]['repeat'] + "  | " + resultObjects[i]['top'])
                 }
+
         }
 
 
@@ -110,9 +141,13 @@ struct Add {
                                                         .fontSize(24)
                                                         .fontWeight(FontWeight.Bold)
                                                         .fontColor("#ffffff").width("40%")
+
                                                 CheckButton({onButtonClick: {click: this.handleDataSave.bind(this)}})
 
-                                        }.justifyContent(FlexAlign.SpaceBetween).width("95%")
+                                        }.justifyContent(FlexAlign.SpaceBetween).width("95%").margin({
+                                                top: '30px',    // 设置上外边距
+                                                bottom: '30px', // 设置下外边距
+                                        })
                                         InputBox({
                                                 title: "事件名",
                                                 placeHolder: "testPlaceHolder",
@@ -120,14 +155,16 @@ struct Add {
                                                 type: "text",
                                                 value: this.titleValue,
                                                 onValueChange: {change: this.handleTitleChange.bind(this)}
-                                        }).height("10%")
+                                        })
+
                                         CustomizedPicker({
                                                 title: "日期",
                                                 name: "date",
                                                 type: "date",
                                                 value: this.dateValue,
                                                 onButtonClick: { click: this.handleDateButtonClick.bind(this) }
-                                        }).height("10%")
+                                        })
+
                                         CustomizedPicker({
                                                 title: "分类",
                                                 name: "tag",
@@ -135,7 +172,7 @@ struct Add {
                                                 value: this.tagValue,
                                                 onButtonClick: { click: this.handleTagButtonClick.bind(this) },
                                                 options: this.tagOptions
-                                        }).height("10%")
+                                        })
                                         CustomizedPicker({
                                                 title: "重复",
                                                 name: "repeat",
@@ -143,17 +180,18 @@ struct Add {
                                                 value: this.repeatValue,
                                                 onButtonClick: { click: this.handleRepeatButtonClick.bind(this) },
                                                 options: this.repeatOptions
-                                        }).height("10%")
+                                        })
                                         InputBox({
                                                 title: "置顶",
                                                 name: "top",
                                                 type: "switch",
                                                 value: this.topValue,
                                                 onValueChange: {change: this.handleTopChange.bind(this)}
-                                        }).height("10%")
+                                        })
 
 
                                 }
+
 
                                 Column(){
                                         if (this.isDatePickerOpen) {
@@ -182,9 +220,9 @@ struct Add {
 
 
 
-                        }.width('100%').justifyContent(FlexAlign.SpaceBetween).height("95%")
+                        }.width('100%').justifyContent(FlexAlign.SpaceBetween).height("100%")
 
                 }
-                .height('100%').backgroundImage($r("app.media.background1")).backgroundImageSize(ImageSize.Cover)
+                .height('100%').backgroundImage(this.customizedBackground).backgroundImageSize(ImageSize.Cover)
         }
 }

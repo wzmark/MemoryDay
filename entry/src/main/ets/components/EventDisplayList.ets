@@ -31,6 +31,18 @@ export struct EventDisplayList{
                 return value
         }
 
+        private jumpDisplay(event: EventItem){
+                router.pushUrl({
+                        // 跳转页面路径
+                        url: 'pages/Display',
+                        // 跳转携带的参数
+                        params: {
+                                event: event
+                        }
+                }, router.RouterMode.Standard)
+
+        }
+
 
         build() {
 
@@ -56,7 +68,9 @@ export struct EventDisplayList{
                                                 DayArrowSymbol({day: Number(this.getDaysDistance(item.date)), sizeOfSymbolHeight: "6%", sizeOfSymbolWidth: "4%", sizeOfFont: 28})
 
 
-                                        }.width("90%").justifyContent(FlexAlign.SpaceBetween)
+                                        }.width("90%").justifyContent(FlexAlign.SpaceBetween).onClick(() => {
+                                                this.jumpDisplay(item)
+                                        })
                                         .border({
                                                 width: {bottom: "1px"},
                                                 color: {bottom: Color.White}

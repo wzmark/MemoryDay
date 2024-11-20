@@ -3,6 +3,8 @@
     "pages/Index",
     "pages/Add",
     "pages/Settings",
-    "pages/Background"
+    "pages/Background",
+    "pages/Display",
+    "pages/Edit"
   ]
 }
