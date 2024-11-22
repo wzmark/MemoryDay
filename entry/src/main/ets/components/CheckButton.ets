@@ -18,8 +18,9 @@ export struct CheckButton{
                                 .fillColor(Color.White)
 
                 }.onClick(() => {
-                        console.log("jump")
+
                         this.onButtonClick.click()
+                        console.log("jump")
                         setTimeout(async () => {
                                 router.pushUrl({
                                         url: "pages/Index"

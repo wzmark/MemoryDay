@@ -75,9 +75,10 @@ struct Index {
 
                 let resultObjects = testNapi.searchRDB() as object[];
                 for (let i: number = 0; i < resultObjects.length; i++) {
-                        let newEvent = new EventItem(resultObjects[i]['title'], resultObjects[i]['date'], resultObjects[i]['repeat'], resultObjects[i]['tag'],  resultObjects[i]['top']);
+
+                        let newEvent = new EventItem(resultObjects[i]["id"], resultObjects[i]['title'], resultObjects[i]['date'], resultObjects[i]['repeat'], resultObjects[i]['tag'],  resultObjects[i]['top']);
                         this.eventList.push(newEvent);
-                        console.error(resultObjects[i]['title'] + " |  " + resultObjects[i]['date'] +"  |  " + resultObjects[i]['tag'] + "  |  " + resultObjects[i]['repeat'] + "  | " + resultObjects[i]['top'])
+                        console.error("id:" + resultObjects[i]["id"]  +"    "+resultObjects[i]['title'] + " |  " + resultObjects[i]['date'] +"  |  " + resultObjects[i]['tag'] + "  |  " + resultObjects[i]['repeat'] + "  | " + resultObjects[i]['top'])
 
                 }
                 let index: number = 0

@@ -22,6 +22,7 @@ import { SettingsModel } from '../model/SettingsModel';
 import SettingsHandler from '../common/utils/SettingsHandler';
 import { router } from '@kit.ArkUI';
 import { EventItem } from '../model/EventModel';
+import { DeleteButton } from '../components/DeleteButton';
 
 
 @Entry
@@ -113,10 +114,14 @@ struct Add {
 
         }
 
-        private async handleDataSave(){
+        private handleEventDelete():void{
+                testNapi.deleteRDB(this.event.id);
+        }
+
+        private async handleDataChange(){
                 let topValueString: string = this.topValue ? "true" : "false";
 
-                testNapi.addRDB(this.titleValue, this.dateValue.toDateString(), this.repeatValue, this.tagValue, topValueString)
+                testNapi.changeRDB(this.event.id, this.titleValue, this.dateValue.toDateString(), this.repeatValue, this.tagValue, topValueString)
 
                 let resultObjects = testNapi.searchRDB() as object[];
 
@@ -142,7 +147,7 @@ struct Add {
                                                         .fontWeight(FontWeight.Bold)
                                                         .fontColor("#ffffff").width("40%")
 
-                                                CheckButton({onButtonClick: {click: this.handleDataSave.bind(this)}})
+                                                CheckButton({onButtonClick: {click: this.handleDataChange.bind(this)}})
 
                                         }.justifyContent(FlexAlign.SpaceBetween).width("95%").margin({
                                                 top: '30px',    // 设置上外边距
@@ -189,8 +194,9 @@ struct Add {
                                                 onValueChange: {change: this.handleTopChange.bind(this)}
                                         })
 
-
+                                        DeleteButton({onButtonClick: {click: this.handleEventDelete.bind(this)}})
                                 }
+
 
 
                                 Column(){

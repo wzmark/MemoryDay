@@ -80,8 +80,8 @@ static napi_value SearchRDB(napi_env env, napi_callback_info info) {
 
 static napi_value ChangeRDB(napi_env env, napi_callback_info info) {
         // get parameters
-        size_t argc = 5;
-        napi_value args[5] = {nullptr};
+        size_t argc = 6;
+        napi_value args[6] = {nullptr};
         napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
 
         int64_t eventId = 0;
