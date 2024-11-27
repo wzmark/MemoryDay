@@ -1,4 +1,5 @@
 import router from '@ohos.router';
+import SettingsHandler from '../common/utils/SettingsHandler';
 import { EventList, EventItem } from '../model/EventModel';
 import { DayArrowSymbol } from './DayArrowSymbol';
 
@@ -7,6 +8,14 @@ import { DayArrowSymbol } from './DayArrowSymbol';
 
 export struct TopEventDisplay{
         @Prop event: EventItem
+        @Prop date: string
+
+        private settings: SettingsHandler = new SettingsHandler()
+
+        async aboutToAppear(): Promise<void> {
+                console.error(await this.settings.getSettingsFormat(new Date(this.event.date)))
+                this.date = await this.settings.getSettingsFormat(new Date(this.event.date))
+        }
 
 
 
@@ -36,20 +45,24 @@ export struct TopEventDisplay{
                 Column(){
                         DayArrowSymbol({day: Number(this.getDaysDistance(this.event.date)), sizeOfSymbolHeight: "12%", sizeOfSymbolWidth: "8%", sizeOfFont: 80})
 
+                        Column(){
+                                Text(this.checkEmptyEvent(this.event.title))
+                                        .fontSize(22)
+                                        .fontWeight(FontWeight.Bold)
+                                        .fontColor("#ffffff").textAlign(TextAlign.Center)
 
 
-                        Text(this.checkEmptyEvent(this.event.title))
-                                .fontSize(22)
-                                .fontWeight(FontWeight.Bold)
-                                .fontColor("#ffffff")
+                                Text(("纪念日  "+ this.event.newDateFormat))
+                                        .fontSize(14)
+                                        .fontColor("#ffffff")
+                                        .textAlign(TextAlign.Center)
+                        }
 
 
-                        Text(("纪念日  "+ this.event.date))
-                                .fontSize(14)
-                                .fontColor("#ffffff")
 
 
-                }.width("90%").height("20%")
+                }.width("100%").height("20%").justifyContent(FlexAlign.Center)  // 垂直居中
+                .alignItems(HorizontalAlign.Center)
 
 
 

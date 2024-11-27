@@ -1,4 +1,5 @@
 import router from '@ohos.router';
+import SettingsHandler from '../common/utils/SettingsHandler';
 import { EventList, EventItem } from '../model/EventModel';
 import { DayArrowSymbol } from './DayArrowSymbol';
 
@@ -44,6 +45,7 @@ export struct EventDisplayList{
         }
 
 
+
         build() {
 
                 Scroll(this.scroller){
@@ -58,7 +60,7 @@ export struct EventDisplayList{
                                                                 .fontColor("#ffffff")
 
 
-                                                        Text(("纪念日  "+item.date))
+                                                        Text(("纪念日  "+item.newDateFormat))
                                                                 .fontSize(14)
                                                                 .fontColor("#ffffff")
 
@@ -82,3 +84,4 @@ export struct EventDisplayList{
 
         }
 }
+

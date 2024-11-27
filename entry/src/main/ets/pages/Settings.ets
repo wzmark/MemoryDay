@@ -11,6 +11,10 @@ import router from '@ohos.router';
 import { SettingsModel } from '../model/SettingsModel';
 import SettingsHandler from '../common/utils/SettingsHandler';
 import resourceManager from '@ohos.resourceManager'
+import { ReminderHandler } from '../common/utils/ReminderHandler';
+import { common, contextConstant } from '@kit.AbilityKit';
+import { EventItem } from '../model/EventModel';
+import { inputMethod } from '@kit.IMEKit';
 
 
 @Entry
@@ -38,8 +42,14 @@ struct Settings {
         @State valueFormat: string = ""
         @State isFormatOpen: boolean = false
         @State customizedBackground: PixelMap | ResourceStr | undefined = undefined
+        private reminderHandler: ReminderHandler = new ReminderHandler();
+        private context = getContext(this) as common.UIAbilityContext;
+        @State eventList: EventItem[] = [];
 
         aboutToAppear(): void {
+
+
+
                 this.handlePreferencesExtract()
                 for(let i = 0; i < 24; i++){
                         let tempStr: string = (i).toString()
@@ -49,6 +59,14 @@ struct Settings {
                         tempStr = tempStr + ":00"
                         this.optionsRemind.push(tempStr)
                 }
+
+
+
+                this.context.area = contextConstant.AreaMode.EL2
+                let databaseDir = this.context.getApplicationContext().databaseDir;
+
+                testNapi.initRDB(databaseDir);
+                this.handleDataExtract();
                 /*
                 for(let i = 0; i < 3; i++){
                         this.optionsFormat.push(this.settings.getSettingsFormat(new Date(Date.now()), i))
@@ -56,6 +74,17 @@ struct Settings {
                 * */
 
 
+        }
+
+        private async handleDataExtract(){
+                let resultObjects = testNapi.searchRDB() as object[];
+                for (let i: number = 0; i < resultObjects.length; i++) {
+
+                        let newEvent = new EventItem(resultObjects[i]["id"], resultObjects[i]['title'], resultObjects[i]['date'], resultObjects[i]['repeat'], resultObjects[i]['tag'],  resultObjects[i]['top'], 1);
+                        this.eventList.push(newEvent);
+                        console.error("id:" + resultObjects[i]["id"]  +"    "+resultObjects[i]['title'] + " |  " + resultObjects[i]['date'] +"  |  " + resultObjects[i]['tag'] + "  |  " + resultObjects[i]['repeat'] + "  | " + resultObjects[i]['top'])
+
+                }
         }
 
         private async handlePreferencesExtract(){
@@ -86,11 +115,23 @@ struct Settings {
                 this.valueRemind = value;
                 let index = this.optionsRemind.indexOf(this.valueRemind)
                 this.settings.changeSettings("remindTime", index.toString())
+                this.reminderHandler.updateAllReminders(this.eventList, index)
+
         }
         private handleFormatChange(value: string): void{
                 this.valueFormat = value;
                 let index = this.optionsFormat.indexOf(this.valueFormat)
                 this.settings.changeSettings("format", index.toString())
+        }
+
+        private handleCloseAllWindow(): void{
+                this.isFormatOpen = false;
+                this.isRemindOpen = false;
+        }
+
+        private handleCloseKeyBoard():void{
+                let inputMethodController = inputMethod.getController();
+                inputMethodController.stopInputSession();
         }
 
         build() {
@@ -161,7 +202,10 @@ struct Settings {
 
 
 
-                }.width('100%').height('100%').backgroundImage(this.customizedBackground).backgroundImageSize(ImageSize.Cover)
+                }.width('100%').height('100%').backgroundImage(this.customizedBackground)
+                .backgroundImageSize(ImageSize.Cover).onClick(() => {
+                        this.handleCloseAllWindow();
+                })
 
 
         }

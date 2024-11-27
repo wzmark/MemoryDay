@@ -23,7 +23,8 @@ import SettingsHandler from '../common/utils/SettingsHandler';
 import { router } from '@kit.ArkUI';
 import { EventItem } from '../model/EventModel';
 import { DeleteButton } from '../components/DeleteButton';
-
+import { ReminderHandler } from '../common/utils/ReminderHandler';
+import inputMethod from '@ohos.inputMethod';
 
 @Entry
 @Component
@@ -46,6 +47,7 @@ struct Add {
         @State topValue: boolean = true
 
         private context = getContext(this) as common.UIAbilityContext;
+        private reminderHandler: ReminderHandler = new ReminderHandler();
         @State securityLevel: distributedKVStore.SecurityLevel = distributedKVStore.SecurityLevel.S1;
         @StorageLink('encrypted') encrypted: boolean = false;
         @StorageLink('kvStore') kvStore: KVStore | undefined = new KVStore(this.encrypted, this.securityLevel);
@@ -83,22 +85,26 @@ struct Add {
                 this.isDatePickerOpen = true;
                 this.isTagOptionOpen = false;
                 this.isRepeatOptionOpen = false;
+                this.handleCloseKeyBoard()
         }
         private handleTagButtonClick(): void{
                 this.isDatePickerOpen = false;
                 this.isTagOptionOpen = true;
                 this.isRepeatOptionOpen = false;
+                this.handleCloseKeyBoard()
         }
         private handleRepeatButtonClick(): void{
                 this.isDatePickerOpen = false;
                 this.isTagOptionOpen = false;
                 this.isRepeatOptionOpen = true;
+                this.handleCloseKeyBoard()
         }
         private handleTitleChange(value: string): void{
                 this.titleValue = value;
         }
         private handleTopChange(value: boolean): void{
                 this.topValue = value;
+                this.handleCloseKeyBoard()
         }
 
         private handleDateChange(value: Date): void{
@@ -108,6 +114,7 @@ struct Add {
         }
         private handleTagChange(value: string): void{
                 this.tagValue = value;
+
         }
         private handleRepeatChange(value: string): void{
                 this.repeatValue = value;
@@ -115,22 +122,33 @@ struct Add {
         }
 
         private handleEventDelete():void{
+                this.reminderHandler.deleteReminder(this.event.id);
                 testNapi.deleteRDB(this.event.id);
         }
 
         private async handleDataChange(){
                 let topValueString: string = this.topValue ? "true" : "false";
 
-                testNapi.changeRDB(this.event.id, this.titleValue, this.dateValue.toDateString(), this.repeatValue, this.tagValue, topValueString)
+                testNapi.changeRDB(this.event.id, this.titleValue, this.dateValue.toDateString(), this.repeatValue, this.tagValue, topValueString, this.event.reminderId)
 
                 let resultObjects = testNapi.searchRDB() as object[];
-
 
                 for (let i: number = 0; i < resultObjects.length; i++) {
 
                         console.error(resultObjects[i]['title'] + " |  " + resultObjects[i]['date'] +"  |  " + resultObjects[i]['tag'] + "  |  " + resultObjects[i]['repeat'] + "  | " + resultObjects[i]['top'])
                 }
 
+        }
+
+        private handleCloseAllWindow(): void{
+                this.isDatePickerOpen = false;
+                this.isTagOptionOpen = false;
+                this.isRepeatOptionOpen = false;
+        }
+
+        private handleCloseKeyBoard():void{
+                let inputMethodController = inputMethod.getController();
+                inputMethodController.stopInputSession();
         }
 
 
@@ -229,6 +247,12 @@ struct Add {
                         }.width('100%').justifyContent(FlexAlign.SpaceBetween).height("100%")
 
                 }
-                .height('100%').backgroundImage(this.customizedBackground).backgroundImageSize(ImageSize.Cover)
+                .height('100%').backgroundImage(this.customizedBackground)
+                .backgroundImageSize(ImageSize.Cover).onClick(() =>{
+                        console.error("Click")
+                        this.handleCloseAllWindow()
+                        this.handleCloseKeyBoard()
+
+                })
         }
 }

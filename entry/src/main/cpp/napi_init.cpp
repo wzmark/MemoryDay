@@ -52,8 +52,8 @@ static napi_value InitRDB(napi_env env, napi_callback_info info) {
 
 static napi_value AddRDB(napi_env env, napi_callback_info info) {
         // get parameters
-        size_t argc = 5;
-        napi_value args[5] = {nullptr};
+        size_t argc = 6;
+        napi_value args[6] = {nullptr};
         napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
         
         char title[31];
@@ -66,9 +66,11 @@ static napi_value AddRDB(napi_env env, napi_callback_info info) {
         napi_get_value_string_utf8(env, args[3], repeat, 30, nullptr);
         char top[31];
         napi_get_value_string_utf8(env, args[4], top, 30, nullptr);
+        char reminderId[31];
+        napi_get_value_string_utf8(env, args[5], reminderId, 30, nullptr);
 
         // execute RDB
-        rdb.Rdb_add(title, date, repeat, tag, top);
+        rdb.Rdb_add(title, date, repeat, tag, top, reminderId);
         return nullptr;
 }
 
@@ -80,8 +82,8 @@ static napi_value SearchRDB(napi_env env, napi_callback_info info) {
 
 static napi_value ChangeRDB(napi_env env, napi_callback_info info) {
         // get parameters
-        size_t argc = 6;
-        napi_value args[6] = {nullptr};
+        size_t argc = 7;
+        napi_value args[7] = {nullptr};
         napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
 
         int64_t eventId = 0;
@@ -97,9 +99,11 @@ static napi_value ChangeRDB(napi_env env, napi_callback_info info) {
         napi_get_value_string_utf8(env, args[4], repeat, 30, nullptr);
         char top[31];
         napi_get_value_string_utf8(env, args[5], top, 30, nullptr);
+        char reminderId[31];
+        napi_get_value_string_utf8(env, args[6], reminderId, 30, nullptr);
 
         // execute RDB
-        rdb.Rdb_change(eventId, title, date, repeat, tag, top);
+        rdb.Rdb_change(eventId, title, date, repeat, tag, top, reminderId);
         return nullptr;
 }
 

@@ -10,7 +10,7 @@ import { CheckButton } from '../components/CheckButton';
 import { ReturnButton } from '../components/ReturnButton';
 import { preferences } from '@kit.ArkData';
 import { common } from '@kit.AbilityKit';
-
+import inputMethod from '@ohos.inputMethod';
 // 引入preferences相关
 import { distributedKVStore } from '@kit.ArkData';
 import { util } from '@kit.ArkTS';
@@ -22,6 +22,7 @@ import { SettingsModel } from '../model/SettingsModel';
 import SettingsHandler from '../common/utils/SettingsHandler';
 import { router } from '@kit.ArkUI';
 import { EventItem } from '../model/EventModel';
+import { ReminderHandler } from '../common/utils/ReminderHandler';
 
 
 @Entry
@@ -44,6 +45,7 @@ struct Add {
         @State topValue: boolean = false;
 
         private context = getContext(this) as common.UIAbilityContext;
+        private reminderHandler: ReminderHandler = new ReminderHandler();
         @State securityLevel: distributedKVStore.SecurityLevel = distributedKVStore.SecurityLevel.S1;
         @StorageLink('encrypted') encrypted: boolean = false;
         @StorageLink('kvStore') kvStore: KVStore | undefined = new KVStore(this.encrypted, this.securityLevel);
@@ -74,22 +76,26 @@ struct Add {
                 this.isDatePickerOpen = true;
                 this.isTagOptionOpen = false;
                 this.isRepeatOptionOpen = false;
+                this.handleCloseKeyBoard()
         }
         private handleTagButtonClick(): void{
                 this.isDatePickerOpen = false;
                 this.isTagOptionOpen = true;
                 this.isRepeatOptionOpen = false;
+                this.handleCloseKeyBoard()
         }
         private handleRepeatButtonClick(): void{
                 this.isDatePickerOpen = false;
                 this.isTagOptionOpen = false;
                 this.isRepeatOptionOpen = true;
+                this.handleCloseKeyBoard()
         }
         private handleTitleChange(value: string): void{
                 this.titleValue = value;
         }
         private handleTopChange(value: boolean): void{
                 this.topValue = value;
+                this.handleCloseKeyBoard()
         }
 
         private handleDateChange(value: Date): void{
@@ -105,10 +111,25 @@ struct Add {
 
         }
 
+        private handleCloseAllWindow(): void{
+                this.isDatePickerOpen = false;
+                this.isTagOptionOpen = false;
+                this.isRepeatOptionOpen = false;
+        }
+
+        private handleCloseKeyBoard():void{
+                let inputMethodController = inputMethod.getController();
+                inputMethodController.stopInputSession();
+        }
+
         private async handleDataSave(){
                 let topValueString: string = this.topValue ? "true" : "false";
-
-                testNapi.addRDB(this.titleValue, this.dateValue.toDateString(), this.repeatValue, this.tagValue, topValueString)
+                let event: EventItem = new EventItem(1, this.titleValue, this.dateValue.toDateString(), this.repeatValue, this.tagValue, this.topValue, 1);
+                let time = this.settingsModel.remindTime
+                //let reminderId: number = await this.reminderHandler.addReminder(event, time);
+                let reminderId = 1;
+                console.log("reminder" + reminderId)
+                testNapi.addRDB(this.titleValue, this.dateValue.toDateString(), this.repeatValue, this.tagValue, topValueString, reminderId)
 
                 let resultObjects = testNapi.searchRDB() as object[];
 
@@ -142,7 +163,7 @@ struct Add {
                                         })
                                         InputBox({
                                                 title: "事件名",
-                                                placeHolder: "testPlaceHolder",
+                                                placeHolder: "请输入事件",
                                                 name: "title",
                                                 type: "text",
                                                 value: this.titleValue,
@@ -165,6 +186,7 @@ struct Add {
                                                 onButtonClick: { click: this.handleTagButtonClick.bind(this) },
                                                 options: this.tagOptions
                                         })
+
                                         CustomizedPicker({
                                                 title: "重复",
                                                 name: "repeat",
@@ -173,6 +195,7 @@ struct Add {
                                                 onButtonClick: { click: this.handleRepeatButtonClick.bind(this) },
                                                 options: this.repeatOptions
                                         })
+
                                         InputBox({
                                                 title: "置顶",
                                                 name: "top",
@@ -215,6 +238,13 @@ struct Add {
                         }.width('100%').justifyContent(FlexAlign.SpaceBetween).height("100%")
 
                 }
-                .height('100%').backgroundImage(this.customizedBackground).backgroundImageSize(ImageSize.Cover)
+                .height('100%').backgroundImage(this.customizedBackground)
+                .backgroundImageSize(ImageSize.Cover)
+                .onClick(() =>{
+                        console.error("Click")
+                        this.handleCloseAllWindow()
+                        this.handleCloseKeyBoard()
+
+                })
         }
 }

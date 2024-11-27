@@ -29,7 +29,7 @@ void RDB::Rdb_init(std::string databaseDir, std::string bundleName) {
 }
 
 
-void RDB::Rdb_add(std::string title, std::string date, std::string repeat, std::string tag, std::string top) {
+void RDB::Rdb_add(std::string title, std::string date, std::string repeat, std::string tag, std::string top, std::string reminderId) {
         /*TODO: 删除重新设置数据库操作
         */
         /*
@@ -37,7 +37,7 @@ void RDB::Rdb_add(std::string title, std::string date, std::string repeat, std::
         OH_Rdb_Execute(store_, dropTableSql);
         */
         char createTableSql[] =
-        "CREATE TABLE IF NOT EXISTS EVENTS (ID INTEGER PRIMARY KEY AUTOINCREMENT, TITLE TEXT NOT NULL, DATE TEXT NOT NULL, REPEAT TEXT NOT NULL, TAG TEXT NOT NULL, TOP TEXT NOT NULL)";
+        "CREATE TABLE IF NOT EXISTS EVENTS (ID INTEGER PRIMARY KEY AUTOINCREMENT, TITLE TEXT NOT NULL, DATE TEXT NOT NULL, REPEAT TEXT NOT NULL, TAG TEXT NOT NULL, TOP TEXT NOT NULL, REMINDERID TEXT NOT NULL)";
         OH_Rdb_Execute(store_, createTableSql);
 
         OH_VBucket *valueBucket = OH_Rdb_CreateValuesBucket();
@@ -46,19 +46,20 @@ void RDB::Rdb_add(std::string title, std::string date, std::string repeat, std::
         valueBucket->putText(valueBucket, "REPEAT", repeat.c_str());
         valueBucket->putText(valueBucket, "TAG", tag.c_str());
         valueBucket->putText(valueBucket, "TOP", top.c_str());
+        valueBucket->putText(valueBucket, "REMINDERID", reminderId.c_str());
 
         int rowId = OH_Rdb_Insert(store_, "EVENTS", valueBucket);
 
         valueBucket->destroy(valueBucket);
 }
-void RDB::Rdb_change(int64_t id, std::string changedTitle, std::string changedDate, std::string changedRepeat, std::string changedTag, std::string changedTop) {
+void RDB::Rdb_change(int64_t id, std::string changedTitle, std::string changedDate, std::string changedRepeat, std::string changedTag, std::string changedTop, std::string reminderId) {
         OH_VBucket *valueBucket = OH_Rdb_CreateValuesBucket();
         valueBucket->putText(valueBucket, "TITLE", changedTitle.c_str());
         valueBucket->putText(valueBucket, "DATE", changedDate.c_str());
         valueBucket->putText(valueBucket, "REPEAT", changedRepeat.c_str());
         valueBucket->putText(valueBucket, "TAG", changedTag.c_str());
         valueBucket->putText(valueBucket, "TOP", changedTop.c_str());
-
+        valueBucket->putText(valueBucket, "REMINDERID", reminderId.c_str());
         OH_Predicates *predicates = OH_Rdb_CreatePredicates("EVENTS");
         OH_VObject *valueObject = OH_Rdb_CreateValueObject();
 

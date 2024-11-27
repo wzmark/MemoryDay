@@ -22,18 +22,21 @@ export struct DayArrowSymbol{
         build() {
 
                 Row(){
-                        Text(this.day.toString())
-                                .fontSize(this.sizeOfFont)
+                        Row(){
+                                Text((" " + this.day.toString()))
+                                        .fontSize(this.sizeOfFont)
 
-                                .fontColor("#ffffff")
-                        Column(){
-                                Image($r('app.media.arrow'))
-                                        .fillColor(Color.White).rotate({angle: this.angle})
-                                        .height(this.sizeOfSymbolHeight).width(this.sizeOfSymbolWidth)
+                                        .fontColor("#ffffff")
+                                Column(){
+                                        Image($r('app.media.arrow'))
+                                                .fillColor(Color.White).rotate({angle: this.angle})
+                                                .height(this.sizeOfSymbolHeight).width(this.sizeOfSymbolWidth)
+                                }
+                                .justifyContent(FlexAlign.Center)
+                                .alignItems(HorizontalAlign.Start).margin({ top: '-8%' })
                         }
-                        .justifyContent(FlexAlign.Center)
-                        .alignItems(HorizontalAlign.Start).margin({ top: '-8%' })
-                }.height("100%")
+
+                }.height("100%").width("100%").justifyContent(FlexAlign.Center)
 
 
 

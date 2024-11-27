@@ -16,6 +16,9 @@ import { DayArrowSymbol } from '../components/DayArrowSymbol';
 import { TopEventDisplay } from '../components/TopEventDisplay';
 import SettingsHandler from '../common/utils/SettingsHandler';
 import { SettingsModel } from '../model/SettingsModel';
+import { MyAbility } from '../common/utils/MyAbility';
+import { BusinessError } from '@kit.BasicServicesKit';
+import { notificationManager } from '@kit.NotificationKit';
 
 
 @Entry
@@ -43,7 +46,7 @@ struct Index {
 
         @State needsRender: boolean = false
         @State customizedBackground: PixelMap | ResourceStr | undefined = undefined
-
+        private myAbility: MyAbility = new MyAbility();
         aboutToAppear(): void {
 
                 this.context.area = contextConstant.AreaMode.EL2
@@ -53,7 +56,14 @@ struct Index {
                 this.handleDataExtract()
 
                 this.handlePreferencesExtract()
-
+                let requestEnableNotificationCallback = (err: BusinessError): void => {
+                        if (err) {
+                                hilog.error(0x0000, 'testTag', `[ANS] requestEnableNotification failed, code is ${err.code}, message is ${err.message}`);
+                        } else {
+                                hilog.info(0x0000, 'testTag', `[ANS] requestEnableNotification success`);
+                        }
+                };
+                notificationManager.requestEnableNotification(this.context, requestEnableNotificationCallback);
 
 
 
@@ -76,7 +86,8 @@ struct Index {
                 let resultObjects = testNapi.searchRDB() as object[];
                 for (let i: number = 0; i < resultObjects.length; i++) {
 
-                        let newEvent = new EventItem(resultObjects[i]["id"], resultObjects[i]['title'], resultObjects[i]['date'], resultObjects[i]['repeat'], resultObjects[i]['tag'],  resultObjects[i]['top']);
+                        let newEvent = new EventItem(resultObjects[i]["id"], resultObjects[i]['title'], resultObjects[i]['date'], resultObjects[i]['repeat'], resultObjects[i]['tag'],  resultObjects[i]['top'], 1);
+                        newEvent.initNewDateFormat()
                         this.eventList.push(newEvent);
                         console.error("id:" + resultObjects[i]["id"]  +"    "+resultObjects[i]['title'] + " |  " + resultObjects[i]['date'] +"  |  " + resultObjects[i]['tag'] + "  |  " + resultObjects[i]['repeat'] + "  | " + resultObjects[i]['top'])
 

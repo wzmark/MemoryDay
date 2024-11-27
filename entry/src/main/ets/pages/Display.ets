@@ -63,7 +63,7 @@ struct Display {
 
                                 Column() {
                                         TopEventDisplay({ event: this.event })
-                                }.height("100%")
+                                }.height("70%").justifyContent(FlexAlign.Center)
                         }.height('100%').backgroundImage(this.customizedBackground).backgroundImageSize(ImageSize.Cover)
         }
 }

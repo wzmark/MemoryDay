@@ -44,8 +44,8 @@ public:
     OH_Rdb_Config config;
 
     void Rdb_init(std::string databaseDir, std::string bundleName);
-    void Rdb_add(std::string title, std::string date, std::string repeat, std::string tag, std::string top);
-    void Rdb_change(int64_t id, std::string changedTitle, std::string changedDate, std::string changedRepeat, std::string changedTag, std::string changedTop);
+    void Rdb_add(std::string title, std::string date, std::string repeat, std::string tag, std::string top, std::string reminderId);
+    void Rdb_change(int64_t id, std::string changedTitle, std::string changedDate, std::string changedRepeat, std::string changedTag, std::string changedTop, std::string reminderId);
     std::vector<Event> Rdb_search(void);
     void Rdb_delete(int64_t id);
     void Rdb_deleteRdb(void);

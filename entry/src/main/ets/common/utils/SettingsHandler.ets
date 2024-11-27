@@ -141,30 +141,39 @@ export default class SettingsHandler{
                 });
         }
 
-        getSettingsFormat(date: Date, option: number): string{
-                let result: string = ""
-                switch (option) {
-                        case 0:
-                                result = ((date as Date).getFullYear() + "年-"
-                                        + ((date as Date).getMonth() + 1)
-                                        + "月-" + (date as Date).getDate()+"日")
-                                break;
-
-                        case 1:
-                                result = (((date as Date).getMonth() + 1)
-                                        + "月-" + (date as Date).getDate()+"日-" + (date as Date).getFullYear() + "年")
-                                break;
-
-                        case 2:
-                                result = ((date as Date).getDate()+"日-" + ((date as Date).getMonth() + 1)
-                                        + "月-"  + (date as Date).getFullYear() + "年")
-                                break;
-                        default:
-                                break;
-                }
+        async getSettingsFormat(date: Date): Promise<string>{
+                let settings: SettingsModel = await this.getPreference()
 
 
-                return result;
+
+                return new Promise((resolve, reject) => {
+                        let option = settings.remindTime
+                        let result: string = ""
+                        switch (option) {
+                                case 0:
+                                        result = ((date as Date).getFullYear() + "年"
+                                                + ((date as Date).getMonth() + 1)
+                                                + "月" + (date as Date).getDate()+"日")
+                                        break;
+
+                                case 1:
+                                        result = (((date as Date).getMonth() + 1)
+                                                + "月" + (date as Date).getDate()+"日" + (date as Date).getFullYear() + "年")
+                                        break;
+
+                                case 2:
+                                        result = ((date as Date).getDate()+"日" + ((date as Date).getMonth() + 1)
+                                                + "月"  + (date as Date).getFullYear() + "年")
+                                        break;
+                                default:
+                                        break;
+                        }
+
+
+                        resolve(result)
+                })
+
+
         }
 
 
